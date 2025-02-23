@@ -1,0 +1,30 @@
+{
+	"name": "react-mirix",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"biome:check": "npx @biomejs/biome check .",
+		"biome:format": "npx @biomejs/biome check --write .",
+		"dev": "vite",
+		"build": "tsc -b && vite build",
+		"lint": "eslint .",
+		"preview": "vite preview"
+	},
+	"dependencies": {
+		"react": "^19.0.0",
+		"react-dom": "^19.0.0",
+		"vite-plugin-svgr": "^4.3.0"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.4",
+		"@types/node": "^22.13.5",
+		"@types/react": "^19.0.8",
+		"@types/react-dom": "^19.0.3",
+		"@vitejs/plugin-react-swc": "^3.5.0",
+		"globals": "^15.14.0",
+		"typescript": "~5.7.2",
+		"vite": "^6.1.0",
+		"vite-plugin-checker": "^0.9.0"
+	}
+}
