@@ -9,7 +9,9 @@
 		"dev": "vite",
 		"build": "tsc -b && vite build",
 		"lint": "eslint .",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"prepare": "husky install",
+		"pre-commit": "lint-staged"
 	},
 	"dependencies": {
 		"react": "^19.0.0",
@@ -18,13 +20,29 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
+		"@commitlint/cli": "^19.7.1",
 		"@types/node": "^22.13.5",
 		"@types/react": "^19.0.8",
 		"@types/react-dom": "^19.0.3",
 		"@vitejs/plugin-react-swc": "^3.5.0",
+		"commitizen": "^4.3.1",
+		"cz-conventional-changelog": "^3.3.0",
 		"globals": "^15.14.0",
+		"husky": "^9.1.7",
+		"lint-staged": "^15.4.3",
 		"typescript": "~5.7.2",
 		"vite": "^6.1.0",
 		"vite-plugin-checker": "^0.9.0"
+	},
+	"config": {
+		"commitizen": {
+			"path": "./commitizen.cjs"
+		}
+	},
+	"lint-staged": {
+		"**/*.{js,jsx,ts,tsx}": [
+			"npx @biomejs/biome check --write .",
+			"npx @biomejs/biome check ."
+		]
 	}
 }
