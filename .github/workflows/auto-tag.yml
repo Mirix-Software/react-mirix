@@ -1,80 +1,88 @@
-name: Auto Tag on PR Merge
+name: Auto Tag Release on PR Merge
 
 on:
   pull_request:
     types: [closed]
 
 jobs:
-  auto-tag:
+  tag_release:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Determine new version based on PR labels
-        id: determine_version
+      - name: Get latest tag
+        id: get_tag
         run: |
-          echo "Fetching latest tag..."
-          latest_tag=$(git tag --sort=version:refname | tail -n 1)
-          if [ -z "$latest_tag" ]; then
-            latest_tag="0.1.0"
-          fi
+          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
           echo "Latest tag: $latest_tag"
+          echo "latest_tag=$latest_tag" >> $GITHUB_ENV
 
-          IFS='.' read -r major minor patch <<< "$latest_tag"
-          echo "Parsed version: major=$major, minor=$minor, patch=$patch"
+      - name: Get commit messages since last tag
+        id: commit_messages
+        run: |
+          messages=$(git log ${{ env.latest_tag }}..HEAD --pretty=format:"%s")
+          echo "Commits: $messages"
+          echo "messages=$messages" >> $GITHUB_ENV
 
-          labels=$(echo '${{ toJson(github.event.pull_request.labels) }}' | jq -r '.[].name' | tr '\n' ' ')
-          echo "PR labels: $labels"
-          
-          bump_major=false
-          bump_minor=false
-          bump_patch=false
-
-          for label in $labels; do
-            if [ "$label" = "release" ] || [ "$label" = "breaking-changes" ]; then
-              bump_major=true
-              break
-            elif [ "$label" = "feature" ] || [ "$label" = "perf" ]; then
-              bump_minor=true
-            elif [ "$label" = "refactor" ] || [ "$label" = "fix" ] || [ "$label" = "documents" ] || [ "$label" = "style" ] || [ "$label" = "test" ] || [ "$label" = "build" ] || [ "$label" = "ci" ] || [ "$label" = "revert" ]; then
-              bump_patch=true
-            fi
-          done
-
-          new_version=""
-          if [ "$bump_major" = true ]; then
-            new_major=$((major + 1))
-            new_version="$new_major.0.0"
-          elif [ "$bump_minor" = true ]; then
-            new_minor=$((minor + 1))
-            new_version="$major.$new_minor.0"
-          elif [ "$bump_patch" = true ]; then
-            new_patch=$((patch + 1))
-            new_version="$major.$minor.$new_patch"
+      - name: Determine version bump
+        id: bump
+        run: |
+          bump=""
+          # Если в сообщениях встречается "release" или "breaking-changes" - мажорное обновление
+          if echo "${{ env.messages }}" | grep -iE "(release|breaking-changes)" > /dev/null; then
+            bump="major"
+          # Если в сообщениях встречается "feature" или "perf" - минорное обновление
+          elif echo "${{ env.messages }}" | grep -iE "(feature|perf)" > /dev/null; then
+            bump="minor"
+          # Если встречаются остальные ключевые слова - патч
+          elif echo "${{ env.messages }}" | grep -iE "(refactor|fix|documents|style|test|build|ci|revert)" > /dev/null; then
+            bump="patch"
           else
-            echo "No version bump label found. Exiting."
-            exit 0
+            bump="patch"
           fi
+          echo "Bump type: $bump"
+          echo "bump_type=$bump" >> $GITHUB_ENV
 
+      - name: Bump version
+        id: version_bump
+        run: |
+          function bump_version() {
+            IFS='.' read -r major minor patch <<< "$1"
+            case "$2" in
+              major)
+                major=$((major + 1))
+                ;;
+              minor)
+                minor=$((minor + 1))
+                ;;
+              patch)
+                patch=$((patch + 1))
+                ;;
+            esac
+            echo "${major}.${minor}.${patch}"
+          }
+
+          current_version=${{ env.latest_tag }}
+          if [ "$current_version" = "0.0.0" ]; then
+            current_version="0.1.0"
+          fi
+          new_version=$(bump_version $current_version ${{ env.bump_type }})
+          echo "Current version: $current_version"
           echo "New version: $new_version"
-          echo "::set-output name=new_version::$new_version"
+          echo "new_version=$new_version" >> $GITHUB_ENV
 
-      - name: Configure Git
+      - name: Create new git tag
         run: |
-          git config --global user.email "github-actions@github.com"
-          git config --global user.name "GitHub Actions"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ env.new_version }}
+          git push origin ${{ env.new_version }}
 
-      - name: Create and push Git tag
-        run: |
-          new_version=${{ steps.determine_version.outputs.new_version }}
-          if [ -z "$new_version" ]; then
-            echo "No new version found. Exiting."
-            exit 0
-          fi
-          echo "Creating tag $new_version"
-          git tag "$new_version"
-          git push origin "$new_version"
+      - name: (Опционально) Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.new_version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
