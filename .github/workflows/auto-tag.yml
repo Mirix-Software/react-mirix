@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Determine new version based on PR labels
         id: determine_version
@@ -21,17 +23,17 @@ jobs:
             latest_tag="0.1.0"
           fi
           echo "Latest tag: $latest_tag"
-          
+
           IFS='.' read -r major minor patch <<< "$latest_tag"
           echo "Parsed version: major=$major, minor=$minor, patch=$patch"
-          
+
           labels=$(echo '${{ toJson(github.event.pull_request.labels) }}' | jq -r '.[].name' | tr '\n' ' ')
           echo "PR labels: $labels"
           
           bump_major=false
           bump_minor=false
           bump_patch=false
-          
+
           for label in $labels; do
             if [ "$label" = "release" ] || [ "$label" = "breaking-changes" ]; then
               bump_major=true
@@ -42,7 +44,7 @@ jobs:
               bump_patch=true
             fi
           done
-          
+
           new_version=""
           if [ "$bump_major" = true ]; then
             new_major=$((major + 1))
@@ -57,7 +59,7 @@ jobs:
             echo "No version bump label found. Exiting."
             exit 0
           fi
-          
+
           echo "New version: $new_version"
           echo "::set-output name=new_version::$new_version"
 
@@ -65,7 +67,7 @@ jobs:
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
-      
+
       - name: Create and push Git tag
         run: |
           new_version=${{ steps.determine_version.outputs.new_version }}
