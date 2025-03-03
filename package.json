@@ -8,7 +8,6 @@
 		"biome:format": "npx @biomejs/biome check --write .",
 		"dev": "vite",
 		"build": "tsc -b && vite build",
-		"lint": "eslint .",
 		"preview": "vite preview",
 		"prepare": "husky install",
 		"pre-commit": "lint-staged"
