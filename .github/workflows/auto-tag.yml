@@ -1,5 +1,8 @@
 name: Auto Tag Release on PR Merge
 
+permissions:
+  contents: write
+
 on:
   pull_request:
     types: [closed]
@@ -22,7 +25,11 @@ jobs:
       - name: Get commit messages since last tag
         id: commit_messages
         run: |
-          messages=$(git log ${{ env.latest_tag }}..HEAD --pretty=format:"%s")
+          if [ "${{ env.latest_tag }}" = "0.0.0" ]; then
+            messages=$(git log --pretty=format:"%s")
+          else
+            messages=$(git log ${{ env.latest_tag }}..HEAD --pretty=format:"%s")
+          fi
           echo "Commits: $messages"
           echo "messages=$messages" >> $GITHUB_ENV
 
@@ -30,13 +37,10 @@ jobs:
         id: bump
         run: |
           bump=""
-          # Если в сообщениях встречается "release" или "breaking-changes" - мажорное обновление
           if echo "${{ env.messages }}" | grep -iE "(release|breaking-changes)" > /dev/null; then
             bump="major"
-          # Если в сообщениях встречается "feature" или "perf" - минорное обновление
           elif echo "${{ env.messages }}" | grep -iE "(feature|perf)" > /dev/null; then
             bump="minor"
-          # Если встречаются остальные ключевые слова - патч
           elif echo "${{ env.messages }}" | grep -iE "(refactor|fix|documents|style|test|build|ci|revert)" > /dev/null; then
             bump="patch"
           else
@@ -79,10 +83,3 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag ${{ env.new_version }}
           git push origin ${{ env.new_version }}
-
-      - name: (Опционально) Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ env.new_version }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
