@@ -72,7 +72,14 @@ jobs:
           if [ "$current_version" = "0.0.0" ]; then
             current_version="0.1.0"
           fi
+
           new_version=$(bump_version $current_version ${{ env.bump_type }})
+
+          while git rev-parse "refs/tags/$new_version" >/dev/null 2>&1; do
+            echo "Tag $new_version already exists, bumping patch version"
+            new_version=$(bump_version $new_version patch)
+          done
+
           echo "Current version: $current_version"
           echo "New version: $new_version"
           echo "new_version=$new_version" >> $GITHUB_ENV
