@@ -1,0 +1,78 @@
+name: Auto Tag on PR Merge
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  auto-tag:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Determine new version based on PR labels
+        id: determine_version
+        run: |
+          echo "Fetching latest tag..."
+          latest_tag=$(git tag --sort=version:refname | tail -n 1)
+          if [ -z "$latest_tag" ]; then
+            latest_tag="0.1.0"
+          fi
+          echo "Latest tag: $latest_tag"
+          
+          IFS='.' read -r major minor patch <<< "$latest_tag"
+          echo "Parsed version: major=$major, minor=$minor, patch=$patch"
+          
+          labels=$(echo '${{ toJson(github.event.pull_request.labels) }}' | jq -r '.[].name' | tr '\n' ' ')
+          echo "PR labels: $labels"
+          
+          bump_major=false
+          bump_minor=false
+          bump_patch=false
+          
+          for label in $labels; do
+            if [ "$label" = "release" ] || [ "$label" = "breaking-changes" ]; then
+              bump_major=true
+              break
+            elif [ "$label" = "feature" ] || [ "$label" = "perf" ]; then
+              bump_minor=true
+            elif [ "$label" = "refactor" ] || [ "$label" = "fix" ] || [ "$label" = "documents" ] || [ "$label" = "style" ] || [ "$label" = "test" ] || [ "$label" = "build" ] || [ "$label" = "ci" ] || [ "$label" = "revert" ]; then
+              bump_patch=true
+            fi
+          done
+          
+          new_version=""
+          if [ "$bump_major" = true ]; then
+            new_major=$((major + 1))
+            new_version="$new_major.0.0"
+          elif [ "$bump_minor" = true ]; then
+            new_minor=$((minor + 1))
+            new_version="$major.$new_minor.0"
+          elif [ "$bump_patch" = true ]; then
+            new_patch=$((patch + 1))
+            new_version="$major.$minor.$new_patch"
+          else
+            echo "No version bump label found. Exiting."
+            exit 0
+          fi
+          
+          echo "New version: $new_version"
+          echo "::set-output name=new_version::$new_version"
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
+      
+      - name: Create and push Git tag
+        run: |
+          new_version=${{ steps.determine_version.outputs.new_version }}
+          if [ -z "$new_version" ]; then
+            echo "No new version found. Exiting."
+            exit 0
+          fi
+          echo "Creating tag $new_version"
+          git tag "$new_version"
+          git push origin "$new_version"
