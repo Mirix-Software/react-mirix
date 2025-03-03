@@ -1,0 +1,36 @@
+name: PR Label Check
+
+on:
+  pull_request:
+    types: [opened, edited, labeled, synchronize]
+
+jobs:
+  check-labels:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for required version bump label
+        id: label_check
+        env:
+          REQUIRED_LABELS: "release,breaking-changes,feature,perf,refactor,fix,documents,style,test,build,ci,revert"
+        run: |
+          echo "Checking labels in PR..."
+          labels=$(echo '${{ toJson(github.event.pull_request.labels) }}' | jq -r '.[].name' | tr '\n' ' ')
+          echo "PR labels: $labels"
+          
+          required_labels=$(echo $REQUIRED_LABELS | tr ',' ' ')
+          label_found=false
+          
+          for req in $required_labels; do
+            if echo "$labels" | grep -qw "$req"; then
+              label_found=true
+              echo "Found required label: $req"
+              break
+            fi
+          done
+          
+          if [ "$label_found" = "false" ]; then
+            echo "::error ::At least one of the required labels is missing. Please assign one of the following labels: $REQUIRED_LABELS."
+            exit 1
+          fi
+          
+          echo "Required label is present."
