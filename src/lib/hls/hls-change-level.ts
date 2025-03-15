@@ -2,11 +2,11 @@ import Hls from 'hls.js';
 import { RefObject } from 'react';
 
 export const hlsChangeLevel = (
-	hlsRef: RefObject<Hls | null>,
-	level: number
+    hlsRef: RefObject<Hls | null>,
+    level: number
 ) => {
-	const hls = hlsRef.current;
-	if (!hls) return;
+    const hls = hlsRef.current;
+    if (!hls) return;
 
-	hls.currentLevel = level;
+    hls.currentLevel = level;
 };

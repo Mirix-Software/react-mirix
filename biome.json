@@ -1,173 +1,173 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-	"extends": [],
-	"files": {
-		"maxSize": 1048576,
-		"ignore": [
-			"**/dist",
-			"**/node_modules",
-			"**/build",
-			"**/public",
-			"**/docs",
-			"**/.gitignore",
-			"**/index.html",
-			"**/README.md"
-		],
-		"ignoreUnknown": false
-	},
-	"vcs": {
-		"enabled": false,
-		"clientKind": "git",
-		"useIgnoreFile": false,
-		"root": ".",
-		"defaultBranch": ""
-	},
-	"linter": {
-		"enabled": true,
-		"ignore": [
-			"**/dist",
-			"**/node_modules",
-			"**/build",
-			"**/public",
-			"**/docs",
-			"**/.gitignore",
-			"**/index.html",
-			"**/README.md"
-		],
-		"include": ["*"],
-		"rules": {
-			"recommended": false,
-			"all": false,
-			"suspicious": {
-				"noImplicitAnyLet": "off",
-				"noConsole": {
-					"level": "warn",
-					"options": {
-						"allow": ["assert", "error", "info", "warn"]
-					}
-				}
-			},
-			"correctness": {
-				"noUnusedImports": "error",
-				"noUnusedVariables": "warn",
-				"noUnusedFunctionParameters": "warn",
-				"useHookAtTopLevel": "error",
-				"useExhaustiveDependencies": "warn"
-			},
-			"style": {
-				"useShorthandArrayType": "warn",
-				"useFilenamingConvention": {
-					"level": "error",
-					"options": {
-						"filenameCases": ["kebab-case"]
-					}
-				}
-			},
-			"complexity": {
-				"useSimplifiedLogicExpression": "warn"
-			}
-		}
-	},
-	"formatter": {
-		"enabled": true,
-		"ignore": [
-			"**/dist",
-			"**/node_modules",
-			"**/build",
-			"**/public",
-			"**/docs",
-			"**/.gitignore",
-			"**/index.html",
-			"**/README.md"
-		],
-		"formatWithErrors": true,
-		"indentStyle": "tab",
-		"indentWidth": 4,
-		"lineEnding": "lf",
-		"lineWidth": 80,
-		"attributePosition": "auto",
-		"useEditorconfig": true,
-		"bracketSpacing": true
-	},
-	"organizeImports": {
-		"enabled": true,
-		"ignore": [],
-		"include": ["*"]
-	},
-	"javascript": {
-		"parser": {
-			"unsafeParameterDecoratorsEnabled": true
-		},
-		"formatter": {
-			"quoteStyle": "single",
-			"jsxQuoteStyle": "single",
-			"quoteProperties": "asNeeded",
-			"trailingCommas": "es5",
-			"semicolons": "always",
-			"arrowParentheses": "always",
-			"enabled": true,
-			"indentStyle": "tab",
-			"indentWidth": 4,
-			"lineEnding": "lf",
-			"lineWidth": 80,
-			"bracketSameLine": false,
-			"bracketSpacing": true,
-			"attributePosition": "auto"
-		},
-		"globals": [],
-		"jsxRuntime": "transparent",
-		"linter": {
-			"enabled": true
-		}
-	},
-	"json": {
-		"parser": {
-			"allowComments": false,
-			"allowTrailingCommas": true
-		},
-		"formatter": {
-			"enabled": true,
-			"indentStyle": "tab",
-			"indentWidth": 4,
-			"lineEnding": "lf",
-			"lineWidth": 80,
-			"trailingCommas": "none"
-		},
-		"linter": {
-			"enabled": true
-		}
-	},
-	"css": {
-		"parser": {
-			"cssModules": true
-		},
-		"formatter": {
-			"enabled": true,
-			"indentStyle": "tab",
-			"indentWidth": 4,
-			"lineEnding": "lf",
-			"lineWidth": 80,
-			"quoteStyle": "single"
-		},
-		"linter": {
-			"enabled": true
-		}
-	},
-	"overrides": [
-		{
-			"include": ["src/components/**"],
-			"linter": {
-				"rules": {
-					"style": {
-						"useFilenamingConvention": {
-							"level": "error",
-							"options": {
-								"filenameCases": ["kebab-case", "PascalCase"]
-							}
-						}
-					}
-				}
-			}
-		}
-	]
+    "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+    "extends": [],
+    "files": {
+        "maxSize": 1048576,
+        "ignore": [
+            "**/dist",
+            "**/node_modules",
+            "**/build",
+            "**/public",
+            "**/docs",
+            "**/.gitignore",
+            "**/index.html",
+            "**/README.md"
+        ],
+        "ignoreUnknown": false
+    },
+    "vcs": {
+        "enabled": false,
+        "clientKind": "git",
+        "useIgnoreFile": false,
+        "root": ".",
+        "defaultBranch": ""
+    },
+    "linter": {
+        "enabled": true,
+        "ignore": [
+            "**/dist",
+            "**/node_modules",
+            "**/build",
+            "**/public",
+            "**/docs",
+            "**/.gitignore",
+            "**/index.html",
+            "**/README.md"
+        ],
+        "include": ["*"],
+        "rules": {
+            "recommended": false,
+            "all": false,
+            "suspicious": {
+                "noImplicitAnyLet": "off",
+                "noConsole": {
+                    "level": "warn",
+                    "options": {
+                        "allow": ["assert", "error", "info", "warn"]
+                    }
+                }
+            },
+            "correctness": {
+                "noUnusedImports": "error",
+                "noUnusedVariables": "warn",
+                "noUnusedFunctionParameters": "warn",
+                "useHookAtTopLevel": "error",
+                "useExhaustiveDependencies": "warn"
+            },
+            "style": {
+                "useShorthandArrayType": "warn",
+                "useFilenamingConvention": {
+                    "level": "error",
+                    "options": {
+                        "filenameCases": ["kebab-case"]
+                    }
+                }
+            },
+            "complexity": {
+                "useSimplifiedLogicExpression": "warn"
+            }
+        }
+    },
+    "formatter": {
+        "enabled": true,
+        "ignore": [
+            "**/dist",
+            "**/node_modules",
+            "**/build",
+            "**/public",
+            "**/docs",
+            "**/.gitignore",
+            "**/index.html",
+            "**/README.md"
+        ],
+        "formatWithErrors": true,
+        "indentStyle": "space",
+        "indentWidth": 4,
+        "lineEnding": "lf",
+        "lineWidth": 80,
+        "attributePosition": "auto",
+        "useEditorconfig": true,
+        "bracketSpacing": true
+    },
+    "organizeImports": {
+        "enabled": true,
+        "ignore": [],
+        "include": ["*"]
+    },
+    "javascript": {
+        "parser": {
+            "unsafeParameterDecoratorsEnabled": true
+        },
+        "formatter": {
+            "quoteStyle": "single",
+            "jsxQuoteStyle": "single",
+            "quoteProperties": "asNeeded",
+            "trailingCommas": "es5",
+            "semicolons": "always",
+            "arrowParentheses": "always",
+            "enabled": true,
+            "indentStyle": "space",
+            "indentWidth": 4,
+            "lineEnding": "lf",
+            "lineWidth": 80,
+            "bracketSameLine": false,
+            "bracketSpacing": true,
+            "attributePosition": "auto"
+        },
+        "globals": [],
+        "jsxRuntime": "transparent",
+        "linter": {
+            "enabled": true
+        }
+    },
+    "json": {
+        "parser": {
+            "allowComments": false,
+            "allowTrailingCommas": true
+        },
+        "formatter": {
+            "enabled": true,
+            "indentStyle": "space",
+            "indentWidth": 4,
+            "lineEnding": "lf",
+            "lineWidth": 80,
+            "trailingCommas": "none"
+        },
+        "linter": {
+            "enabled": true
+        }
+    },
+    "css": {
+        "parser": {
+            "cssModules": true
+        },
+        "formatter": {
+            "enabled": true,
+            "indentStyle": "space",
+            "indentWidth": 4,
+            "lineEnding": "lf",
+            "lineWidth": 80,
+            "quoteStyle": "single"
+        },
+        "linter": {
+            "enabled": true
+        }
+    },
+    "overrides": [
+        {
+            "include": ["src/components/**"],
+            "linter": {
+                "rules": {
+                    "style": {
+                        "useFilenamingConvention": {
+                            "level": "error",
+                            "options": {
+                                "filenameCases": ["kebab-case", "PascalCase"]
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
 }
