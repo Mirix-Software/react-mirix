@@ -9,28 +9,37 @@ const CL_TIME_DISPLAY_CURRENT = 'text-right';
 const CL_TIME_DISPLAY_DURATION = 'text-left';
 
 export const Scrubber = forwardRef<HTMLDivElement, ScrubberProps>(
-	(
-		{ className, current = null, duration = null, buffer, onSeek, ...rest },
-		ref
-	) => {
-		return (
-			<div ref={ref} className={cn(CL_CONTAINER, className)} {...rest}>
-				<ScrubberTimeDisplay
-					className={CL_TIME_DISPLAY_CURRENT}
-					value={current}
-				/>
-				<ScrubberTrack
-					current={current}
-					duration={duration}
-					buffer={buffer}
-					onSeek={onSeek}
-				/>
-				<ScrubberTimeDisplay
-					className={CL_TIME_DISPLAY_DURATION}
-					value={duration}
-					overlay={current}
-				/>
-			</div>
-		);
-	}
+    (
+        {
+            className,
+            current = null,
+            duration = null,
+            buffer,
+            onSeek,
+            onSeekCommit,
+            ...rest
+        },
+        ref
+    ) => {
+        return (
+            <div ref={ref} className={cn(CL_CONTAINER, className)} {...rest}>
+                <ScrubberTimeDisplay
+                    className={CL_TIME_DISPLAY_CURRENT}
+                    value={current}
+                />
+                <ScrubberTrack
+                    current={current}
+                    duration={duration}
+                    buffer={buffer}
+                    onSeek={onSeek}
+                    onSeekCommit={onSeekCommit}
+                />
+                <ScrubberTimeDisplay
+                    className={CL_TIME_DISPLAY_DURATION}
+                    value={duration}
+                    overlay={current}
+                />
+            </div>
+        );
+    }
 );
