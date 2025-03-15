@@ -1,10 +1,11 @@
 import { Controls } from '@components/controls';
 import { Player } from '@components/player';
-import { Button, Scrubber } from '@components/ui';
+import { Button, Scrubber, Slider } from '@components/ui';
 import { Icon } from '@components/ui/icon';
 import { clampMax, clampMin } from '@lib/clamp';
 import { debounce } from '@lib/debounce';
 import { cn } from '@lib/utils';
+import { SliderProps } from '@radix-ui/react-slider';
 import { PlayerProps, ScrubberProps } from '@types';
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
@@ -21,6 +22,8 @@ export default function App() {
     const videoUrl = searchParams.get('video-url') ?? '';
     const [current, setCurrent] = useState<number | null>(null);
     const [buffer, setBuffer] = useState<{ start: number; end: number }[]>([]);
+    const [volume, setVolume] = useState(1);
+    const [muted, setMuted] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [isPaused, setIsPaused] = useState(true);
     const [isSeeking, setIsSeeking] = useState(false);
@@ -146,12 +149,32 @@ export default function App() {
         setPreventHide(true);
     };
 
+    const handleVolumeChange: PlayerProps['onVolumeChange'] = (e) => {
+        const video = e.currentTarget;
+
+        setVolume(e.currentTarget.volume);
+        setMuted(e.currentTarget.muted);
+    };
+
     const handleMouseEnter = () => {
         if (!isPaused) setPreventHide(true);
     };
 
     const handleMouseLeave = () => {
         if (!isPaused) setPreventHide(false);
+    };
+
+    const handleVolumeSliderChange: SliderProps['onValueChange'] = (value) => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        const volume = value?.[0] ?? 0;
+
+        video.volume = volume;
+        if (volume > 0 && videoRef.current.muted) {
+            videoRef.current.muted = false;
+            setMuted(false);
+        }
     };
 
     useEffect(() => {
@@ -238,6 +261,7 @@ export default function App() {
                 onLoadedMetadata={handleProgress}
                 onPlay={handlePlay}
                 onPause={handlePause}
+                onVolumeChange={handleVolumeChange}
             >
                 <code>video</code> is not supported.
             </Player>
@@ -266,7 +290,7 @@ export default function App() {
                                 'flex justify-between items-center w-full'
                             }
                         >
-                            <Button className={'flex w-[252px]'}>
+                            <Button className={'flex w-[332px]'}>
                                 <div
                                     className={
                                         'w-full flex items-center justify-between'
@@ -326,6 +350,15 @@ export default function App() {
                                 >
                                     <Icon type={'volume'} />
                                 </Button>
+                                <Slider
+                                    className={'w-16'}
+                                    value={[volume]}
+                                    min={0}
+                                    max={1}
+                                    step={0.01}
+                                    onValueChange={handleVolumeSliderChange}
+                                />
+                                {muted && 'muted'}
                                 <Button
                                     variant={'text'}
                                     size={'icon-lg'}
