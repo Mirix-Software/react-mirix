@@ -1,4 +1,4 @@
-name: Auto Tag Release on PR Merge
+name: Auto Tag Version
 
 permissions:
   contents: write
@@ -8,88 +8,63 @@ on:
     types: [closed]
 
 jobs:
-  tag_release:
-    if: github.event.pull_request.merged == true
+  auto-tag:
+    if: ${{ github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-      - name: Fetch tags
-        run: git fetch --tags
-
-      - name: Get latest tag
-        id: get_tag
+      - name: Get last tag
+        id: get_last_tag
         run: |
-          latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
-          echo "Latest tag: $latest_tag"
-          echo "latest_tag=$latest_tag" >> $GITHUB_ENV
-
-      - name: Get commit messages since last tag
-        id: commit_messages
-        run: |
-          if [ "${{ env.latest_tag }}" = "0.0.0" ]; then
-            messages=$(git log --pretty=format:"%s")
-          else
-            messages=$(git log ${{ env.latest_tag }}..HEAD --pretty=format:"%s")
+          last_tag=$(git describe --tags --abbrev=0 2>/dev/null)
+          if [ -z "$last_tag" ]; then
+            last_tag="v0.0.0"
           fi
-          echo "Commits: $messages"
-          echo "messages=$messages" >> $GITHUB_ENV
+          echo "Last tag: $last_tag"
+          echo "last_tag=$last_tag" >> $GITHUB_OUTPUT
 
-      - name: Determine version bump
-        id: bump
+      - name: Determine new version
+        id: determine_version
+        uses: actions/github-script@v6
+        env:
+          LAST_TAG: ${{ steps.get_last_tag.outputs.last_tag }}
+        with:
+          script: |
+            const lastTag = process.env.LAST_TAG;
+            const versionRegex = /^(\d+)\.(\d+)\.(\d+)$/;
+            const match = lastTag.match(versionRegex);
+            if (!match) {
+              throw new Error('Invalid tag format: ' + lastTag);
+            }
+            let major = parseInt(match[1]);
+            let minor = parseInt(match[2]);
+            let patch = parseInt(match[3]);
+            
+            const prLabels = context.payload.pull_request.labels.map(label => label.name);
+            console.log("PR labels:", prLabels);
+            
+            if (prLabels.includes("breaking-changes") || prLabels.includes("release")) {
+              major = major + 1;
+              minor = 0;
+              patch = 0;
+            } else if (prLabels.includes("feature") || prLabels.includes("perf")) {
+              minor = minor + 1;
+              patch = 0;
+            } else if (prLabels.some(label => ["refactor", "fix", "documents", "style", "test", "build", "ci", "revert"].includes(label))) {
+              patch = patch + 1;
+            }
+            const newVersion = `${major}.${minor}.${patch}`;
+            core.info(`New version: ${newVersion}`);
+            return newVersion;
+
+      - name: Create new tag
+        id: create_tag
         run: |
-          bump=""
-          if echo "${{ env.messages }}" | grep -iE "(release|breaking-changes)" > /dev/null; then
-            bump="major"
-          elif echo "${{ env.messages }}" | grep -iE "(feature|perf)" > /dev/null; then
-            bump="minor"
-          elif echo "${{ env.messages }}" | grep -iE "(refactor|fix|documents|style|test|build|ci|revert)" > /dev/null; then
-            bump="patch"
-          else
-            bump="patch"
-          fi
-          echo "Bump type: $bump"
-          echo "bump_type=$bump" >> $GITHUB_ENV
-
-      - name: Bump version
-        id: version_bump
-        run: |
-          function bump_version() {
-            IFS='.' read -r major minor patch <<< "$1"
-            case "$2" in
-              major)
-                major=$((major + 1))
-                ;;
-              minor)
-                minor=$((minor + 1))
-                ;;
-              patch)
-                patch=$((patch + 1))
-                ;;
-            esac
-            echo "${major}.${minor}.${patch}"
-          }
-
-          current_version=${{ env.latest_tag }}
-          if [ "$current_version" = "0.0.0" ]; then
-            current_version="0.1.0"
-          fi
-
-          new_version=$(bump_version $current_version ${{ env.bump_type }})
-
-          while git rev-parse "refs/tags/$new_version" >/dev/null 2>&1; do
-            echo "Tag $new_version already exists, bumping patch version"
-            new_version=$(bump_version $new_version patch)
-          done
-
-          echo "Current version: $current_version"
-          echo "New version: $new_version"
-          echo "new_version=$new_version" >> $GITHUB_ENV
-
-      - name: Create new git tag
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag ${{ env.new_version }}
-          git push origin ${{ env.new_version }}
+          new_version="${{ steps.determine_version.outputs.result }}"
+          echo "Creating new tag: $new_version"
+          git tag "$new_version"
+          git push origin "$new_version"
