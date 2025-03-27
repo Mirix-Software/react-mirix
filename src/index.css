@@ -7,6 +7,7 @@
     --background--base: 0, 0, 0;
     --card-base: 18, 18, 20;
     --primary-base: 255, 255, 255;
+    --brand-base: 133, 78, 202;
     --destructive-base: 255, 68, 67;
     --quality-start: rgb(82, 115, 224);
     --quality-end: rgb(232, 71, 73);
@@ -20,6 +21,7 @@
     --secondary: rgba(var(--primary-base), 0.5);
     --tertiary: rgba(var(--primary-base), 0.75);
     --border: rgba(var(--primary-base), 0.2);
+    --brand: rgb(var(--brand-base));
     --destructive: rgb(var(--destructive-base));
     --inner-primary: rgba(var(--primary-base), 0.1);
     --inner-secondary: rgba(var(--primary-base), 0.2);
@@ -37,6 +39,7 @@
     --color-secondary: var(--secondary);
     --color-tertiary: var(--tertiary);
     --color-border: var(--border);
+    --color-brand: var(--brand);
     --color-destructive: var(--destructive);
     --color-inner-primary: var(--inner-primary);
     --color-inner-secondary: var(--inner-secondary);
