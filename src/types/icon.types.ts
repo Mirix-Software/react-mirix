@@ -16,6 +16,9 @@ import settings from '@assets/icons/settings.svg';
 import share from '@assets/icons/share.svg';
 import speed from '@assets/icons/speed.svg';
 import voiceover from '@assets/icons/voiceover.svg';
+import volumeHalf from '@assets/icons/volume-half.svg';
+import volumeMuted from '@assets/icons/volume-muted.svg';
+import volumeNone from '@assets/icons/volume-none.svg';
 import volume from '@assets/icons/volume.svg';
 
 export const IconTypes = {
@@ -38,4 +41,7 @@ export const IconTypes = {
     speed,
     voiceover,
     volume,
+    ['volume-half']: volumeHalf,
+    ['volume-muted']: volumeMuted,
+    ['volume-none']: volumeNone,
 };
